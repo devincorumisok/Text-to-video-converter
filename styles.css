@@ -1,55 +1,83 @@
+/* General body styling */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-.container {
+    background-color: #f0f0f0; /* Light grey background */
+    color: #333; /* Dark text color */
     text-align: center;
-    background: #ffffff;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 480px;
+    margin: 0;
 }
 
+/* Heading styling */
 h1 {
     color: #333;
-    font-size: 1.5em;
+    margin-bottom: 20px;
 }
 
+/* Text area styling */
 textarea {
-    width: 100%;
+    width: 80%;
+    max-width: 600px;
     height: 100px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
 }
 
-button, a {
-    background-color: #007bff;
+/* Button styling */
+button {
+    background-color: #007bff; /* Blue button */
     color: white;
     border: none;
-    border-radius: 4px;
     padding: 10px 20px;
-    margin: 5px;
-    cursor: pointer;
+    text-align: center;
     text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
 }
 
-button:hover, a:hover {
-    background-color: #0056b3;
+button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
 }
 
+/* Download link styling */
+a#download-btn {
+    display: none;
+    background-color: #28a745; /* Green button */
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    margin: 20px 0;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+a#download-btn:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+/* Status message styling */
 #status-message {
-    margin-top: 10px;
-    color: #555;
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+#status-message.success {
+    color: #28a745; /* Green for success */
+    background-color: #e9fbe9; /* Light green background */
+}
+
+#status-message.error {
+    color: #dc3545; /* Red for errors */
+    background-color: #fbe9e9; /* Light red background */
 }
