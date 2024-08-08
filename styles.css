@@ -34,7 +34,7 @@ textarea {
     box-sizing: border-box;
 }
 
-button {
+button, a {
     background-color: #007bff;
     color: white;
     border: none;
@@ -42,9 +42,10 @@ button {
     padding: 10px 20px;
     margin: 5px;
     cursor: pointer;
+    text-decoration: none;
 }
 
-button:hover {
+button:hover, a:hover {
     background-color: #0056b3;
 }
 

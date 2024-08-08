@@ -5,6 +5,26 @@ document.getElementById('generate-btn').addEventListener('click', async function
         return;
     }
 
+    try {
+        const videoBlob = await generateVideo(text);
+        const videoUrl = URL.createObjectURL(videoBlob);
+
+        const downloadBtn = document.getElementById('download-btn');
+        const statusMessage = document.getElementById('status-message');
+
+        downloadBtn.style.display = 'inline'; // Make the download button visible
+        downloadBtn.href = videoUrl;
+        downloadBtn.download = 'text-video.mp4';
+        downloadBtn.textContent = 'Download Video';
+
+        statusMessage.textContent = 'Your video is ready for download!';
+    } catch (error) {
+        console.error('Error generating video:', error);
+        alert('There was an error generating the video. Check the console for details.');
+    }
+});
+
+async function generateVideo(text) {
     const fps = 30;
     const duration = 5; // Duration in seconds
     const frameCount = fps * duration;
@@ -27,69 +47,57 @@ document.getElementById('generate-btn').addEventListener('click', async function
     }
 
     // Convert frames to video
-    try {
-        const videoBlob = await generateVideo(frames, width, height, fps);
-        const videoUrl = URL.createObjectURL(videoBlob);
+    return new Promise((resolve, reject) => {
+        try {
+            const mimeType = 'video/mp4';
+            const video = document.createElement('video');
+            const stream = video.captureStream();
+            const recorder = new MediaRecorder(stream, { mimeType });
+            const chunks = [];
 
-        const downloadBtn = document.getElementById('download-btn');
-        const statusMessage = document.getElementById('status-message');
-        
-        downloadBtn.disabled = false;
-        downloadBtn.href = videoUrl;
-        downloadBtn.download = 'text-video.mp4';
-        downloadBtn.textContent = 'Download Video';
+            recorder.ondataavailable = event => chunks.push(event.data);
+            recorder.onerror = error => reject(error);
+            recorder.onstop = () => {
+                resolve(new Blob(chunks, { type: mimeType }));
+            };
 
-        statusMessage.textContent = 'Your video is ready for download!';
-    } catch (error) {
-        console.error('Error generating video:', error);
-        alert('There was an error generating the video.');
-    }
-});
+            recorder.start();
 
-async function generateVideo(frames, width, height, fps) {
-    const frameDuration = 1000 / fps; // duration of each frame in milliseconds
-    const mimeType = 'video/mp4';
-    const video = document.createElement('video');
-    const stream = video.captureStream();
-    const recorder = new MediaRecorder(stream, { mimeType });
-    const chunks = [];
+            // Function to simulate frame capture and adding to video
+            const addFramesToVideo = () => new Promise((resolve) => {
+                let index = 0;
+                const intervalId = setInterval(() => {
+                    if (index >= frames.length) {
+                        clearInterval(intervalId);
+                        recorder.stop();
+                        resolve();
+                    } else {
+                        const image = new Image();
+                        image.src = frames[index];
+                        image.onload = () => {
+                            const frameCanvas = document.createElement('canvas');
+                            frameCanvas.width = width;
+                            frameCanvas.height = height;
+                            const ctx = frameCanvas.getContext('2d');
+                            ctx.drawImage(image, 0, 0, width, height);
+                            const frameStream = frameCanvas.captureStream(fps);
+                            const frameRecorder = new MediaRecorder(frameStream, { mimeType });
+                            frameRecorder.start();
+                            frameRecorder.ondataavailable = event => {
+                                if (event.data.size > 0) {
+                                    chunks.push(event.data);
+                                }
+                            };
+                            frameRecorder.stop();
+                        };
+                        index++;
+                    }
+                }, 1000 / fps);
+            });
 
-    recorder.ondataavailable = event => chunks.push(event.data);
-    recorder.start();
-
-    // Function to simulate frame capture and adding to video
-    const addFramesToVideo = () => new Promise((resolve) => {
-        let index = 0;
-        const intervalId = setInterval(() => {
-            if (index >= frames.length) {
-                clearInterval(intervalId);
-                recorder.stop();
-                resolve();
-            } else {
-                const image = new Image();
-                image.src = frames[index];
-                image.onload = () => {
-                    const frameCanvas = document.createElement('canvas');
-                    frameCanvas.width = width;
-                    frameCanvas.height = height;
-                    const ctx = frameCanvas.getContext('2d');
-                    ctx.drawImage(image, 0, 0, width, height);
-                    const frameStream = frameCanvas.captureStream(fps);
-                    const frameRecorder = new MediaRecorder(frameStream, { mimeType });
-                    frameRecorder.start();
-                    frameRecorder.ondataavailable = event => {
-                        if (event.data.size > 0) {
-                            chunks.push(event.data);
-                        }
-                    };
-                    frameRecorder.stop();
-                };
-                index++;
-            }
-        }, frameDuration);
+            addFramesToVideo();
+        } catch (error) {
+            reject(error);
+        }
     });
-
-    await addFramesToVideo();
-
-    return new Blob(chunks, { type: mimeType });
 }
